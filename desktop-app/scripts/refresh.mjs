@@ -1,0 +1,10 @@
+import {writeFile,readFile} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+const commit=process.argv[2];if(!/^[a-f0-9]{40}$/.test(commit||''))throw Error('검토한 GitHub 커밋 SHA가 필요합니다.');
+const r=await fetch(`https://raw.githubusercontent.com/aijunny0604-alt/directors-lab/${commit}/index.html`);if(!r.ok)throw Error(`원본 다운로드 실패 ${r.status}`);
+const source=await r.text(),match=/<script>([\s\S]*?)<\/script>/.exec(source);if(!match)throw Error('원본 스크립트 형식 변경');
+for(const name of ['invoke30','bridgeUI29','file26','custom25','desk30'])if(!match[1].includes(name))throw Error('원본 연결 계약 변경: '+name);
+const html=source.replace(match[0],'<script src="studio.js"></script><script src="desktop-ui.js"></script>').replace('</head>','<link rel="stylesheet" href="desktop.css"></head>');
+await writeFile(new URL('../studio.js',import.meta.url),match[1]);await writeFile(new URL('../index.html',import.meta.url),html);
+const provenance={repository:'aijunny0604-alt/directors-lab',commit,sha256:createHash('sha256').update(source).digest('hex'),fetchedAt:new Date().toISOString(),title:source.match(/<title>(.*?)<\/title>/)?.[1]};
+await writeFile(new URL('../upstream.json',import.meta.url),JSON.stringify(provenance,null,2));console.log(JSON.stringify(provenance));

@@ -1,0 +1,10 @@
+import {readFile,readdir} from 'node:fs/promises';
+import {execFileSync} from 'node:child_process';
+import vm from 'node:vm';
+import {fileURLToPath} from 'node:url';
+const root=new URL('../',import.meta.url);
+for(const name of ['studio.js','desktop-ui.js'])new vm.Script(await readFile(new URL(name,root),'utf8'),{filename:name});
+for(const name of await readdir(new URL('desktop/',root)))if(/\.(mjs|cjs)$/.test(name))execFileSync(process.execPath,['--check',fileURLToPath(new URL('desktop/'+name,root))],{stdio:'pipe'});
+const html=await readFile(new URL('index.html',root),'utf8');
+if(html.includes('<script>')||!html.includes('src="studio.js"')||!html.includes('src="desktop-ui.js"'))throw Error('로컬 스크립트 분리 확인 실패');
+console.log('구문·로컬 스크립트 검사 통과');

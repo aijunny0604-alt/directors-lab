@@ -1,0 +1,10 @@
+node_modules/
+dist/
+*.log
+.env*
+!*.example
+credentials*
+test-results/
+index.html
+studio.js
+upstream.json

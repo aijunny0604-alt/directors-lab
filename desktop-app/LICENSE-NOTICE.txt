@@ -1,0 +1,8 @@
+DIRECTOR'S LAB 기존 콘텐츠 원본:
+https://github.com/aijunny0604-alt/directors-lab
+
+개인 사용을 위한 Windows 패키지입니다. 기존 스튜디오 콘텐츠의 권리와 라이선스는 원저작자에게 있습니다.
+원본 저장소에 별도 라이선스가 명시되어 있지 않으므로 이 패키지를 제3자에게 재배포할 권한을 부여하지 않습니다.
+
+Electron 및 npm 의존성은 각각의 라이선스를 따릅니다.
+배포 폴더의 LICENSE.electron.txt와 LICENSES.chromium.html 등을 함께 보관하세요.

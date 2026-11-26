@@ -1,0 +1,28 @@
+{
+  "name": "directors-lab-desktop",
+  "version": "3.2.1",
+  "description": "DIRECTOR'S LAB 개인용 Windows 스튜디오",
+  "author": "DIRECTOR'S LAB",
+  "private": true,
+  "type": "module",
+  "main": "desktop/main.cjs",
+  "scripts": {
+    "start": "node scripts/from-root.mjs && electron .",
+    "test": "node --test tests/*.test.mjs",
+    "check": "node scripts/from-root.mjs && node scripts/check.mjs",
+    "dist": "npm run check && electron-builder --win nsis zip --x64",
+    "smoke": "electron . --smoke-test"
+  },
+  "dependencies": { "jose": "6.2.18" },
+  "devDependencies": { "electron": "45.5.0", "electron-builder": "26.18.0" },
+  "build": {
+    "appId": "com.directorslab.personal",
+    "productName": "Directors Lab",
+    "copyright": "DIRECTOR'S LAB",
+    "asar": true,
+    "directories": { "output": "dist" },
+    "files": ["desktop/**/*", "index.html", "studio.js", "desktop.css", "desktop-ui.js", "upstream.json", "package.json", "README-KO.txt", "LICENSE-NOTICE.txt"],
+    "win": { "target": ["nsis", "zip"], "artifactName": "Directors-Lab-${version}-${arch}.${ext}", "signAndEditExecutable": false },
+    "nsis": { "oneClick": false, "perMachine": false, "allowToChangeInstallationDirectory": true, "createDesktopShortcut": true, "deleteAppDataOnUninstall": false, "artifactName": "Directors-Lab-Setup-${version}-${arch}.${ext}" }
+  }
+}
