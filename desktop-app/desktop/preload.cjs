@@ -1,6 +1,7 @@
 const {contextBridge,ipcRenderer}=require('electron');
 const invoke=(name,...args)=>ipcRenderer.invoke('director:'+name,...args);
 contextBridge.exposeInMainWorld('directorDesktop',Object.freeze({
+  info:()=>invoke('info'),
   status:()=>invoke('status'),login:(id,force)=>invoke('login',id,force),select:id=>invoke('select',id),
   logout:()=>invoke('logout'),cancelLogin:()=>invoke('cancelLogin'),models:()=>invoke('models'),
   infer:(model,prompt)=>invoke('infer',model,prompt),batchStart:(model,count,project)=>invoke('batchStart',model,count,project),

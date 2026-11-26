@@ -21,7 +21,7 @@
     "copyright": "DIRECTOR'S LAB",
     "asar": true,
     "directories": { "output": "dist" },
-    "files": ["desktop/**/*", "index.html", "studio.js", "desktop.css", "desktop-ui.js", "upstream.json", "package.json", "README-KO.txt", "LICENSE-NOTICE.txt"],
+    "files": ["desktop/**/*", "index.html", "studio.js", "desktop.css", "desktop-ui.js", "upstream.json", "package.json", "README.md", "README-KO.txt", "SETUP.md", "VERIFICATION.md", "LICENSE-NOTICE.txt"],
     "win": { "target": ["nsis", "zip"], "artifactName": "Directors-Lab-${version}-${arch}.${ext}", "signAndEditExecutable": false },
     "nsis": { "oneClick": false, "perMachine": false, "allowToChangeInstallationDirectory": true, "createDesktopShortcut": true, "deleteAppDataOnUninstall": false, "artifactName": "Directors-Lab-Setup-${version}-${arch}.${ext}" }
   }

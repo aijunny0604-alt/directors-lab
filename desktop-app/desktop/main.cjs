@@ -7,11 +7,11 @@ protocol.registerSchemesAsPrivileged([{scheme:'directorapp',privileges:{standard
 app.setName('Directors Lab');
 if(app.commandLine.hasSwitch('smoke-test'))app.setPath('userData',path.join(__dirname,'..','test-results','chromium-profile'));
 if(!app.requestSingleInstanceLock()){app.quit();}else{
-  let window,ai,sync,publicError,initialized=false,closing=false,syncBusy=false;
+  let window,ai,sync,publicError,initialized=false,closing=false,syncBusy=false,studioInfo={},studioDirectory;
   const URL_APP='directorapp://studio/';
   const root=path.join(__dirname,'..');
   const trusted=event=>window&&!window.isDestroyed()&&event.sender===window.webContents&&event.senderFrame===window.webContents.mainFrame&&event.senderFrame.url===URL_APP;
-  const allowedExternal=value=>{try{const u=new URL(value);return u.protocol==='https:'&&!u.username&&!u.password&&['chatgpt.com','auth.openai.com','developers.openai.com','help.openai.com','learn.chatgpt.com','docs.google.com','drive.google.com','aijunny0604-alt.github.io','github.com'].includes(u.hostname);}catch{return false;}};
+  const allowedExternal=value=>{try{const u=new URL(value);return u.protocol==='https:'&&!u.username&&!u.password&&['chatgpt.com','auth.openai.com','developers.openai.com','help.openai.com','learn.chatgpt.com','docs.google.com','drive.google.com','support.google.com','aijunny0604-alt.github.io','github.com'].includes(u.hostname);}catch{return false;}};
   async function external(value){if(allowedExternal(value))await shell.openExternal(value);}
   function register(name,fn){ipcMain.handle('director:'+name,async(event,...args)=>{
     if(!trusted(event))return {ok:false,error:'허용되지 않은 화면의 요청입니다.'};
@@ -47,6 +47,8 @@ if(!app.requestSingleInstanceLock()){app.quit();}else{
     const {FolderSync}=await import(pathToFileURL(path.join(__dirname,'sync.mjs')));
     ({publicError}=await import(pathToFileURL(path.join(__dirname,'errors.mjs'))));
     const data=app.commandLine.hasSwitch('smoke-test')?path.join(root,'test-results','profile'):app.getPath('userData');
+    studioDirectory=root;
+    if(!app.commandLine.hasSwitch('smoke-test')){const {latestStudio}=await import(pathToFileURL(path.join(__dirname,'studio-update.mjs')));studioInfo=await latestStudio(path.join(data,'studio-updates'));if(studioInfo.directory)studioDirectory=studioInfo.directory;}
     const vault=await new Vault(path.join(data,'account'),{
       encrypt:async text=>{if(!safeStorage.isEncryptionAvailable())throw Error('encryption unavailable');return safeStorage.encryptString(text);},
       decrypt:async bytes=>safeStorage.decryptString(bytes)
@@ -62,6 +64,7 @@ if(!app.requestSingleInstanceLock()){app.quit();}else{
     });
     register('status',()=>vault.status());register('login',(id,force)=>ai.login(typeof id==='string'?id:'',force===true));register('select',id=>ai.select(id));register('cancelLogin',()=>ai.cancelLogin());register('logout',async()=>{const r=await ai.logout();return {status:r,revoked:r.revocationConfirmed!==false};});register('models',()=>ai.models());register('infer',(model,prompt)=>ai.infer(model,prompt));register('batchStart',(model,count,project)=>ai.batchStart(model,count,project));register('batchInfer',(lease,prompt)=>ai.infer(ai.lease?.model,prompt,lease));register('batchEnd',lease=>ai.batchEnd(lease));
     register('syncStatus',()=>sync.status());register('syncCycle',bundle=>syncCall(()=>sync.cycle(bundle)));register('syncAck',id=>syncCall(()=>sync.acknowledge(id)));
+    register('info',()=>({version:app.getVersion(),commit:studioInfo.commit||'',title:studioInfo.title||'',checked:studioInfo.checked,message:studioInfo.message||''}));
     register('inferMeta',(model,prompt)=>ai.infer(model,prompt,undefined,true));register('batchInferMeta',(lease,prompt)=>ai.infer(ai.lease?.model,prompt,lease,true));
     register('syncDisconnect',()=>syncCall(()=>sync.disconnect()));
     register('syncChoose',async()=>{
@@ -81,7 +84,7 @@ if(!app.requestSingleInstanceLock()){app.quit();}else{
       const u=new URL(request.url);const file=u.hostname==='studio'?staticFiles[u.pathname]:null;
       if(!file||request.method!=='GET')return new Response('Not found',{status:404});
       const type=file.endsWith('.html')?'text/html; charset=utf-8':file.endsWith('.css')?'text/css; charset=utf-8':'text/javascript; charset=utf-8';
-      return new Response(await fs.readFile(path.join(root,file)),{headers:{'Content-Type':type,'Content-Security-Policy':"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' data: blob:; font-src 'self'; connect-src 'self' data: blob:; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'",'X-Content-Type-Options':'nosniff'}});
+      return new Response(await fs.readFile(path.join(['index.html','studio.js'].includes(file)?studioDirectory:root,file)),{headers:{'Content-Type':type,'Content-Security-Policy':"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' data: blob:; font-src 'self'; connect-src 'self' data: blob:; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'",'X-Content-Type-Options':'nosniff'}});
     });
     Menu.setApplicationMenu(Menu.buildFromTemplate([
       {label:'Directors Lab',submenu:[{label:'ChatGPT 연결',click:()=>window.webContents.executeJavaScript("open('ChatGPT 협업 연결')")},{label:'기기 동기화',click:()=>window.webContents.executeJavaScript("open('기기 동기화')")},{label:'로그인 취소',click:()=>ai.cancelLogin()},{type:'separator'},{role:'quit',label:'종료'}]},

@@ -3,7 +3,11 @@ const DESKTOP_SYNC_PAGE='기기 동기화';
 let desktopSyncState={enabled:false,folder:'',message:'Google Drive 폴더를 연결하면 다른 PC에서 이어서 작업할 수 있습니다.',heads:[]};
 let desktopSyncBusy=false,desktopApplying=false,desktopSyncTimer,desktopDirty=false,desktopGeneration=0;
 let desktopFilesCache=null,desktopAuditCache=null,desktopAckPending=null;
-const desktopKeys=['directors-lab-v1','dl30-advanced','dl-board-display-v312'];
+const desktopKeys=['directors-lab-v1','dl30-advanced','dl-board-display-v312','dl-desktop-preferred-model'];
+let desktopStudioInfo={};
+const desktopModelUI=modelUI30;
+modelUI30=function(){if(!desk30.model&&desk30.models.length){const preferred=localStorage.getItem('dl-desktop-preferred-model');desk30.model=desk30.models.find(x=>x.slug===preferred)?.slug||desk30.models[0].slug;}desktopModelUI();};
+document.addEventListener('change',e=>{if(e.target.matches('#deskModel30,#model34')&&e.target.value){localStorage.setItem('dl-desktop-preferred-model',e.target.value);desktopChanged();}});
 const desktopNav=nav;
 nav=function(){desktopNav();const el=$v('nav');if(el&&!el.querySelector('[data-desktop-sync]')){const b=document.createElement('button');b.dataset.desktopSync='1';b.textContent='기기 동기화';b.classList.toggle('active',page===DESKTOP_SYNC_PAGE);b.onclick=()=>open(DESKTOP_SYNC_PAGE);el.append(b);}};
 const desktopBridge=bridgeUI29;
@@ -79,6 +83,7 @@ async function desktopApply(pull){
 function desktopStatus(){
   let bar=$v('desktopStatusBar');if(!bar){bar=document.createElement('div');bar.id='desktopStatusBar';bar.className='desktop-status';bar.innerHTML='<strong>WINDOWS STUDIO</strong><span id="desktopSyncMessage"></span><button id="desktopSyncButton">기기 동기화</button>';document.body.prepend(bar);$v('desktopSyncButton').onclick=()=>open(DESKTOP_SYNC_PAGE);}
   $v('desktopSyncMessage').textContent=desktopSyncState.message;
+  const studioLabel=bar.querySelector('strong');studioLabel.textContent=desktopStudioInfo.commit?'WINDOWS · '+desktopStudioInfo.commit.slice(0,7):'WINDOWS STUDIO';studioLabel.title=desktopStudioInfo.message||desktopStudioInfo.title||'시작할 때 GitHub 최신 스튜디오 원본 확인';
   if(page===DESKTOP_SYNC_PAGE){const status=$v('desktopSyncDetail');if(status)status.textContent=desktopSyncState.message;const conflicts=$v('desktopConflicts');if(conflicts){conflicts.innerHTML=desktopSyncState.heads.length?'<div class="sync-conflict"><h3>두 PC의 수정이 겹쳤습니다</h3><p>각 버전을 보존했습니다. 이어서 사용할 버전을 선택하세요.</p>'+desktopSyncState.heads.map(h=>`<p>${E(h.device)} · ${E(new Date(h.date).toLocaleString('ko-KR'))} ${h.local?'· 현재 PC 기준':''}<br><button data-sync-pick="${E(h.id)}">이 버전으로 이어가기</button></p>`).join('')+'</div>':'';conflicts.querySelectorAll('[data-sync-pick]').forEach(b=>b.onclick=()=>void desktopResolve(b.dataset.syncPick));}}
 }
 async function desktopTick(){
@@ -105,6 +110,7 @@ async function desktopResolve(id){
 }
 function desktopSyncPage(){
   view.innerHTML=`<section class="simplePaper30"><small>GOOGLE DRIVE / MULTI-PC</small><h2>회사에서도, 집에서도 같은 작업실</h2><p>이 앱을 두 PC에 설치하고 각 PC에서 ChatGPT에 로그인하세요. 프로젝트와 첨부파일은 Google Drive의 같은 폴더로 이어집니다.</p><div class="drive-steps"><article><b>01 · Google Drive 준비</b><p>두 PC의 Drive 데스크톱 앱을 같은 Google 계정으로 연결하세요.</p></article><article><b>02 · 같은 폴더 선택</b><p>Drive 안의 개인 폴더를 선택하세요. 앱이 DirectorsLab-sync 폴더를 만듭니다. 집 PC에서도 같은 폴더를 고르세요.</p></article><article><b>03 · 작업 이어가기</b><p>텍스트·AI 결과·첨부파일을 약 15초마다 확인합니다. Drive 다운로드가 끝나야 다른 PC에 도착합니다.</p></article></div><div class="card"><h3>${desktopSyncState.enabled?'동기화 폴더 연결됨':'아직 동기화 폴더가 없습니다'}</h3><p class="sync-path">${E(desktopSyncState.folder||'Google Drive의 개인 폴더를 선택하세요.')}</p><div class="actions"><button id="desktopChoose" class="primary">Google Drive 폴더 선택</button><button id="desktopNow">지금 동기화</button><button id="desktopDisconnect">이 PC 동기화 끄기</button><button id="desktopRecovery">적용 전 자동 백업 폴더</button></div><p id="desktopSyncDetail" role="status">${E(desktopSyncState.message)}</p></div><div id="desktopConflicts"></div><details><summary>다른 PC로 옮길 때 알아둘 점</summary><p>ChatGPT 로그인과 토큰은 동기화하지 않습니다. 집 PC에서 따로 로그인하세요. 기존 웹사이트의 기록은 웹사이트 백업 메뉴에서 JSON을 내려받아 이 앱의 백업 메뉴로 가져오면 됩니다. 웹사이트의 에셋 파일은 에셋 관리실에서 따로 백업·가져오세요.</p><p>앱을 닫기 전 동기화 확인 메시지와 Google Drive 업로드 완료를 확인하세요. 첨부파일 전체 한도는 80MB이며 큰 영상 원본은 Drive에 별도 보관하세요. 두 PC에서 동시에 수정하면 자동으로 덮어쓰지 않고 사용할 버전을 선택하게 합니다.</p><p>이 동기화는 원본 Google Drive 폴더를 통해 작동합니다. Drive가 꺼져 있거나 오프라인이면 다른 PC로 전달되지 않습니다. 보드와 결과는 이 PC에도 남습니다.</p></details></section>`;
+  const driveHelp=document.createElement('p');driveHelp.innerHTML='<a href="https://support.google.com/drive/answer/10838124?hl=ko" target="_blank" rel="noopener noreferrer">Google Drive 데스크톱 공식 설치 안내 ↗</a> · 미설치 상태라면 먼저 설치하고 같은 Google 계정으로 로그인하세요.';view.querySelector('.drive-steps').after(driveHelp);
   $v('desktopChoose').onclick=async()=>{try{const r=await invoke30('syncChoose');Object.assign(desktopSyncState,r);desktopSyncState.heads=[];desktopSyncState.message=r.enabled?'폴더를 연결했습니다. 첫 동기화를 확인 중입니다.':'폴더 선택을 취소했습니다.';render();await desktopTick();}catch(e){desktopSyncState.message=e.message;desktopStatus();}};
   $v('desktopNow').onclick=()=>void desktopTick();
   $v('desktopDisconnect').onclick=async()=>{try{Object.assign(desktopSyncState,await invoke30('syncDisconnect'));desktopSyncState.heads=[];desktopSyncState.message='이 PC의 자동 동기화를 껐습니다. 로컬 프로젝트와 Drive 파일은 유지합니다.';render();}catch(e){desktopSyncState.message=e.message;desktopStatus();}};
@@ -117,4 +123,6 @@ document.addEventListener('input',()=>{if(!desktopApplying)desktopGeneration++;}
 setInterval(()=>void desktopTick(),15000);
 document.querySelector('footer').textContent='Windows 개인 스튜디오 · ChatGPT 플랜 연결 · Google Drive 폴더 동기화 · 로그인 정보는 이 PC에만 저장';
 invoke30('syncStatus').then(status=>{Object.assign(desktopSyncState,status);if(status.enabled)desktopSyncState.message='Google Drive 폴더 연결됨 · 최신 프로젝트 확인 중';desktopStatus();void desktopTick();}).catch(e=>{desktopSyncState.message=e.message;desktopStatus();});
+if(typeof window.directorDesktop.info==='function')invoke30('info').then(info=>{desktopStudioInfo=info;desktopStatus();}).catch(()=>{});
+invoke30('status').then(async status=>{desk30.status=status;if(status.sharing){desk30.models=await invoke30('models');modelUI30();}}).catch(()=>{});
 document.documentElement.dataset.desktopReady='1';render();

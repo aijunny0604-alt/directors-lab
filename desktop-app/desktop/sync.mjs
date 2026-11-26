@@ -5,7 +5,7 @@ import { hostname } from 'node:os';
 import { atomicWrite } from './vault.mjs';
 import { ServiceError } from './errors.mjs';
 
-export const STORAGE_KEYS=['directors-lab-v1','dl30-advanced','dl-board-display-v312'];
+export const STORAGE_KEYS=['directors-lab-v1','dl30-advanced','dl-board-display-v312','dl-desktop-preferred-model'];
 export const digest=value=>createHash('sha256').update(value).digest('hex');
 const hex=x=>typeof x==='string'&&/^[a-f0-9]{64}$/.test(x);
 function problem(message='동기화 파일을 읽을 수 없습니다. Google Drive의 다운로드 완료 여부를 확인하세요.') {return new ServiceError(message,'sync_file_error');}

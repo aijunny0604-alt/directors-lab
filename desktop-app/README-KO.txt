@@ -1,9 +1,13 @@
 DIRECTOR'S LAB · Windows 개인 스튜디오
 
 1. 회사 PC와 집 PC에서 사용
+   최신 다운로드: https://github.com/aijunny0604-alt/directors-lab/releases/latest
    Directors-Lab-Setup 실행 파일로 각 PC에 설치하세요.
    설치가 필요 없는 ZIP은 각 PC의 로컬 폴더에 풀고 Directors Lab.exe를 실행하세요.
    ZIP에서 실행 파일만 따로 꺼내면 실행할 수 없습니다.
+   실행 환경이 포함되어 Node.js나 Python을 별도로 설치하지 않습니다.
+   시작할 때 GitHub의 최신 호환 스튜디오 원본을 자동 반영합니다.
+   Windows 인증·동기화 연결 프로그램 자체의 새 버전은 최신 설치 파일로 갱신하세요.
 
 2. 내 ChatGPT 계정 연결
    앱 왼쪽 'ChatGPT 연결' → Continue with ChatGPT.

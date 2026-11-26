@@ -2,7 +2,17 @@
 
 회사 PC와 집 PC에서 각각 실행하고 같은 ChatGPT 계정으로 로그인하는 개인 스튜디오입니다. 별도 API 키 없이 공식 Sign in with ChatGPT의 플랜 사용 권한을 요청합니다. 계정·지역·조직 정책과 ChatGPT 사용 한도가 적용됩니다.
 
-## 다른 PC에서 실행
+## 다른 PC에서 바로 설치 (권장)
+
+[최신 Windows 설치 파일](https://github.com/aijunny0604-alt/directors-lab/releases/latest)을 열어 `Directors-Lab-Setup-…-x64.exe`를 내려받고 설치하세요. Node.js나 Python을 별도로 설치할 필요가 없습니다. 압축형 ZIP은 전체를 풀고 `Directors Lab.exe`를 실행합니다.
+
+앱을 시작할 때 이 저장소의 최신 `index.html`을 고정 커밋으로 내려받아 연결 호환성과 구문을 검사한 뒤 자동 적용합니다. 인터넷이 끊겼거나 새 원본이 호환되지 않으면 마지막 호환 원본 또는 앱 포함본으로 실행합니다. 이미 열린 작업과 실행 중인 AI 호출을 중간에 교체하지 않습니다. Windows 인증·동기화 연결부 자체가 바뀐 경우에는 최신 설치 파일로 업데이트하세요.
+
+각 PC의 첫 ChatGPT 로그인·플랜 동의, Google Drive 설치·로그인·공유 폴더 선택은 직접 완료해야 합니다. 그 뒤 로그인 갱신, 사용 가능한 모델 선택·선택값 기억, 원본 확인과 연결한 폴더 동기화는 앱이 처리합니다. 기기별 로그인 정보를 GitHub나 다른 PC로 전달하지 않습니다.
+
+자세한 순서는 [다른 PC 설정 문서](SETUP.md), 실제 호출 증빙과 한계는 [검증 기록](VERIFICATION.md)에 있습니다.
+
+## 소스에서 실행
 
 1. 이 저장소 전체를 ZIP으로 내려받아 압축을 풀거나 `git clone`합니다.
 2. Windows용 Node.js LTS를 설치합니다.
@@ -15,7 +25,7 @@ npm start
 
 앱의 **ChatGPT 연결 → Continue with ChatGPT**에서 로그인하고 플랜 사용에 동의한 뒤 모델을 선택하세요. **연결 테스트 (AI 1회)**로 실제 응답을 확인할 수 있습니다. 로그인·동의는 각 PC에서 별도로 진행합니다.
 
-`npm start`와 빌드는 저장소 루트의 최신 `index.html`을 읽어 Windows 앱에 반영합니다. 루트 웹사이트 원본은 수정하지 않습니다. 업데이트는 저장소를 다시 내려받거나 `git pull`한 뒤 실행하세요.
+`npm start`와 빌드는 저장소 루트의 `index.html`을 앱 포함본으로 준비합니다. 실제 앱 시작 시 GitHub 최신 호환 원본도 확인합니다. Windows 연결부 소스 수정까지 받으려면 `git pull` 후 `npm ci`로 갱신하세요.
 
 ## 설치 파일 만들기
 
@@ -26,7 +36,7 @@ npm run dist
 
 `dist`에 Windows x64 설치 파일과 압축형 실행 폴더 ZIP이 생성됩니다. ZIP은 전체를 풀고 `Directors Lab.exe`를 실행하세요. 생성물에는 개인 로그인 정보가 포함되지 않습니다.
 
-GitHub **Actions → Windows 로컬 앱 빌드 → Run workflow**로도 설치 파일을 만들 수 있습니다. 완료된 실행의 **Artifacts → Directors-Lab-Windows**를 내려받으세요. GitHub Actions의 사용 가능량·저장 정책은 GitHub 계정 조건에 따릅니다.
+GitHub **Actions → Windows 로컬 앱 빌드 → Run workflow**로도 설치 파일을 만들 수 있습니다. 성공하면 GitHub Releases에 설치 파일과 ZIP이 게시되며 **Artifacts → Directors-Lab-Windows**에도 보관합니다. GitHub Actions의 사용 가능량·저장 정책은 GitHub 계정 조건에 따릅니다.
 
 ## Google Drive로 회사·집 작업 이어가기
 

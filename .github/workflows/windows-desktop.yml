@@ -7,7 +7,7 @@ on:
       - desktop-app/**
       - .github/workflows/windows-desktop.yml
 permissions:
-  contents: read
+  contents: write
 jobs:
   windows:
     runs-on: windows-latest
@@ -34,3 +34,12 @@ jobs:
             desktop-app/dist/*.zip
             desktop-app/README-KO.txt
           retention-days: 30
+      - name: GitHub Releases에 설치 파일 게시
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $directorVersion = node -p "require('./package.json').version"
+          $directorTag = "desktop-v$directorVersion-build$env:GITHUB_RUN_NUMBER"
+          $directorAssets = Get-ChildItem -LiteralPath dist -File | Where-Object { $_.Extension -in '.exe', '.zip' } | ForEach-Object FullName
+          gh release create $directorTag @directorAssets --repo $env:GITHUB_REPOSITORY --target $env:GITHUB_SHA --title "Windows 로컬 앱 $directorVersion" --notes-file README-KO.txt --latest

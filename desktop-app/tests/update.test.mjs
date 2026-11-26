@@ -1,0 +1,12 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {mkdtemp,writeFile} from 'node:fs/promises';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import {prepareStudio,latestStudio} from '../desktop/studio-update.mjs';
+const sha='a'.repeat(40);
+const source=`<html><head><title>Studio</title></head><body><script>const contract='invoke30 bridgeUI29 file26 custom25 desk30 state28 create39 execute39 journalAdd37 auditDB37 execute34';</script></body></html>`;
+test('원본 업데이트는 승인된 저장소의 고정 커밋을 다운로드하고 로컬 스크립트로 분리',async()=>{let urls=[];const directory=await mkdtemp(join(tmpdir(),'dl-update-'));const r=await latestStudio(directory,{fetcher:async url=>{urls.push(url);return url.includes('api.github.com')?Response.json([{sha}]):new Response(source);}});assert.equal(r.commit,sha);assert(r.directory.endsWith(sha));assert(urls[1].includes('/'+sha+'/index.html'));assert(prepareStudio(source).html.includes('src="desktop-ui.js"'));});
+test('오프라인이면 마지막 호환 원본으로 실행',async()=>{const directory=await mkdtemp(join(tmpdir(),'dl-offline-')),now=Date.now();await latestStudio(directory,{now,fetcher:async url=>url.includes('api.github.com')?Response.json([{sha}]):new Response(source)});const r=await latestStudio(directory,{now:now+120000,fetcher:async()=>{throw Error('offline');}});assert.equal(r.commit,sha);assert.equal(r.checked,false);});
+test('손상된 캐시는 실행하지 않고 앱 포함본으로 복구',async()=>{const directory=await mkdtemp(join(tmpdir(),'dl-tamper-')),now=Date.now();await latestStudio(directory,{now,fetcher:async url=>url.includes('api.github.com')?Response.json([{sha}]):new Response(source)});await writeFile(join(directory,sha,'studio.js'),'tampered');const r=await latestStudio(directory,{now:now+120000,fetcher:async()=>{throw Error('offline');}});assert.equal(r.directory,null);});
+test('외부 스크립트·구문 오류·호환 계약이 바뀐 업데이트는 적용하지 않음',()=>{assert.throws(()=>prepareStudio(source.replace('<script>','<script src="https://evil.invalid/x">')));assert.throws(()=>prepareStudio(source.replace('const contract=',') const contract=')));assert.throws(()=>prepareStudio(source.replace('execute39','removed')));});
