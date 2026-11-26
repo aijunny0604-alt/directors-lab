@@ -11,7 +11,8 @@
     "test": "node --test tests/*.test.mjs",
     "check": "node scripts/from-root.mjs && node scripts/check.mjs",
     "dist": "npm run check && electron-builder --win nsis zip --x64",
-    "smoke": "electron . --smoke-test"
+    "smoke": "electron . --smoke-test",
+    "verify:live": "node scripts/from-root.mjs && electron scripts/live-check.cjs"
   },
   "dependencies": { "jose": "6.2.18" },
   "devDependencies": { "electron": "45.5.0", "electron-builder": "26.18.0" },
